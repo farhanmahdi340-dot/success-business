@@ -1,5 +1,8 @@
 document.addEventListener('DOMContentLoaded', () => {
 
+    // আপনার নতুন Vercel ব্যাকএ্যান্ড URL
+    const BASE_URL = 'https://success-business-9k3r.vercel.app';
+
     // ১. সাইনআপ / রেজিস্ট্রেশন ফর্ম হ্যান্ডলার
     const registerForm = document.getElementById('registerForm');
     if (registerForm) {
@@ -11,7 +14,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const password = document.getElementById('regPassword')?.value.trim();
 
             try {
-                const res = await fetch('/api/auth/register', {
+                // নতুন লিঙ্ক আপডেট করা হয়েছে
+                const res = await fetch(`${BASE_URL}/api/auth/register`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ name, email, password })
@@ -41,7 +45,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const password = document.getElementById('loginPassword')?.value.trim();
 
             try {
-                const res = await fetch('/api/auth/login', {
+                // নতুন লিঙ্ক আপডেট করা হয়েছে
+                const res = await fetch(`${BASE_URL}/api/auth/login`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email, password })
