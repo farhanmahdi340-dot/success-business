@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secure Identity & Face Verification</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-900 text-white min-h-screen p-6 flex flex-col justify-center items-center">
+
+    <div class="max-w-4xl w-full bg-slate-800 p-8 rounded-2xl shadow-xl border border-slate-700">
+        <h2 class="text-2xl font-bold mb-6 text-center text-blue-400">Anti-Fraud Identity Verification</h2>
+
+        <!-- মেসেজ প্রদর্শনের জন্য নোটিফিকেশন বক্স -->
+        <div id="alertBox" class="hidden mb-6 p-4 rounded-lg text-center font-semibold"></div>
+
+        <form id="uploadForm" class="space-y-6">
+            
+            <!-- ১. ডকুমেন্ট টাইপ সিলেকশন -->
+            <div>
+                <label class="block text-sm font-medium mb-2 text-slate-300">ভেরিফিকেশনের জন্য ডকুমেন্ট নির্বাচন করুন:</label>
+                <select id="documentType" class="w-full p-3 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-blue-500">
+                    <option value="nid">জাতীয় পরিচয়পত্র (NID Card)</option>
+                    <option value="passport">পাসপোর্ট (Passport)</option>
+                    <option value="driving_license">ড্রাইভিং লাইসেন্স (Driving License)</option>
+                    <option value="birth_certificate">ডিজিটাল জন্ম নিবন্ধন (Birth Certificate)</option>
+                </select>
+            </div>
+
+            <!-- ১.১ ডকুমেন্ট নম্বর (ঐচ্ছিক/প্রয়োজনীয়) -->
+            <div>
+                <label class="block text-sm font-medium mb-2 text-slate-300">ডকুমেন্ট / কার্ড নম্বর লিখুন:</label>
+                <input type="text" id="documentNumber" placeholder="যেমন: 1234567890" class="w-full p-3 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-blue-500" required>
+            </div>
+
+            <!-- ২. লাইভ ফেস / সেলফি ছবি -->
+            <div class="border-2 border-dashed border-slate-600 rounded-lg p-4 text-center">
+                <label class="block text-sm font-medium mb-2 text-slate-300">📸 লাইভ ফেস / সেলফি ছবি (Selfie Image)</label>
+                <input type="file" id="selfieInput" accept="image/*" required class="block w-full text-sm text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700 cursor-pointer">
+            </div>
+
+            <!-- ৩. ডকুমেন্টের সামনের অংশ (Front Side) -->
+            <div class="border-2 border-dashed border-slate-600 rounded-lg p-4 text-center">
+                <label class="block text-sm font-medium mb-2 text-slate-300">🪪 ডকুমেন্টের সামনের পার্ট (Doc Front Side)</label>
+                <input type="file" id="docFrontInput" accept="image/*" required class="block w-full text-sm text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700 cursor-pointer">
+            </div>
+
+            <!-- ৪. ডকুমেন্টের পেছনের অংশ (Back Side - ঐচ্ছিক/যদি থাকে) -->
+            <div class="border-2 border-dashed border-slate-600 rounded-lg p-4 text-center">
+                <label class="block text-sm font-medium mb-2 text-slate-300">🔄 ডকুমেন্টের পিছনের পার্ট (Doc Back Side - যদি থাকে)</label>
+                <input type="file" id="docBackInput" accept="image/*" class="block w-full text-sm text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-slate-600 file:text-white hover:file:bg-slate-700 cursor-pointer">
+            </div>
+
+            <!-- সাবমিট বাটন -->
+            <button type="submit" id="submitBtn" class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg transition duration-200">
+                Submit for Verification
+            </button>
+        </form>
+    </div>
+
+    <!-- JavaScript Handling -->
+    <script>
+        document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const alertBox = document.getElementById('alertBox');
+            const submitBtn = document.getElementById('submitBtn');
+
+            const documentType = document.getElementById('documentType').value;
+            const documentNumber = document.getElementById('documentNumber').value;
+            const selfieFile = document.getElementById('selfieInput').files[0];
+            const docFrontFile = document.getElementById('docFrontInput').files[0];
+            const docBackFile = document.getElementById('docBackInput').files[0];
+
+            if (!selfieFile || !docFrontFile) {
+                showAlert("দয়া করে সেলফি এবং ডকুমেন্টের সামনের অংশ অবশ্যই নির্বাচন করুন।", "bg-red-600");
+                return;
+            }
+
+            // বাটন ডিজেবল ও লোডিং টেক্সট
+            submitBtn.innerText = "অপেক্ষা করুন, আপলোড হচ্ছে...";
+            submitBtn.disabled = true;
+
+            const formData = new FormData();
+            formData.append('documentType', documentType);
+            formData.append('documentNumber', documentNumber);
+            formData.append('selfie', selfieFile);
+            formData.append('docFront', docFrontFile);
+            
+            if (docBackFile) {
+                formData.append('docBack', docBackFile);
+            }
+
+            try {
+                const res = await fetch('/api/auth/submit-verification', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await res.json();
+                if (res.ok && data.success) {
+                    showAlert("আপনার নথি সফলভাবে সাবমিট হয়েছে!", "bg-green-600");
+                    document.getElementById('uploadForm').reset();
+                } else {
+                    showAlert(data.message || "আপলোড করতে সমস্যা হয়েছে।", "bg-red-600");
+                }
+            } catch (err) {
+                console.error("Fetch Error:", err);
+                showAlert("সার্ভারে রিকোয়েস্ট পাঠাতে সমস্যা হচ্ছে। ব্যাকএন্ড রান আছে কিনা চেক করুন।", "bg-red-600");
+            } finally {
+                submitBtn.innerText = "Submit for Verification";
+                submitBtn.disabled = false;
+            }
+        });
+
+        function showAlert(message, bgColor) {
+            const alertBox = document.getElementById('alertBox');
+            alertBox.className = `mb-6 p-4 rounded-lg text-center font-semibold text-white ${bgColor}`;
+            alertBox.innerText = message;
+            alertBox.classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Success Business - Access Portal</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-900 text-white min-h-screen flex items-center justify-center p-4">
+
+    <div class="max-w-md w-full bg-slate-800 p-8 rounded-2xl shadow-2xl border border-slate-700">
+        
+        <!-- হেডার -->
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-extrabold text-white tracking-wider mb-2">SUCCESS BUSINESS</h1>
+            <p class="text-slate-400 text-sm">আপনার সাফল্যের ডিজিটাল পার্টনার</p>
+        </div>
+
+        <!-- ট্যাব সুইচ বাটন (লগইন / নিবন্ধন) -->
+        <div class="flex bg-slate-900 p-1 rounded-xl mb-6 border border-slate-700">
+            <button id="loginTabBtn" onclick="switchTab('login')" class="w-1/2 py-2.5 text-sm font-semibold rounded-lg bg-white text-slate-900 transition-all">
+                লগইন
+            </button>
+            <button id="registerTabBtn" onclick="switchTab('register')" class="w-1/2 py-2.5 text-sm font-semibold text-slate-400 hover:text-white transition-all">
+                নিবন্ধন
+            </button>
+        </div>
+
+        <!-- ১. লগইন ফর্ম -->
+        <form id="loginForm" class="space-y-5">
+            <div>
+                <label class="block text-sm font-medium text-slate-300 mb-1">ইমেইল ঠিকানা</label>
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">📧</span>
+                    <input type="email" id="loginEmail" placeholder="yourname@gmail.com" required 
+                        class="w-full pl-10 pr-4 py-3 bg-slate-900 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-blue-500">
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-slate-300 mb-1">পাসওয়ার্ড</label>
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">🔒</span>
+                    <input type="password" id="loginPassword" placeholder="••••••••" required 
+                        class="w-full pl-10 pr-4 py-3 bg-slate-900 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-blue-500">
+                </div>
+            </div>
+
+            <button type="submit" class="w-full py-3 bg-white hover:bg-slate-200 text-slate-900 font-bold rounded-lg transition duration-200 flex items-center justify-center gap-2">
+                প্রবেশ করুন ➔
+            </button>
+        </form>
+
+        <!-- ২. নিবন্ধন (Sign Up) ফর্ম -->
+        <form id="registerForm" class="space-y-5 hidden">
+            <div>
+                <label class="block text-sm font-medium text-slate-300 mb-1">আপনার পূর্ণ নাম</label>
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">👤</span>
+                    <input type="text" id="regName" placeholder="যেমন: তারিকুল ইসলাম" required 
+                        class="w-full pl-10 pr-4 py-3 bg-slate-900 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-blue-500">
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-slate-300 mb-1">ইমেইল ঠিকানা</label>
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">📧</span>
+                    <input type="email" id="regEmail" placeholder="yourname@gmail.com" required 
+                        class="w-full pl-10 pr-4 py-3 bg-slate-900 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-blue-500">
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-slate-300 mb-1">পাসওয়ার্ড</label>
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">🔒</span>
+                    <input type="password" id="regPassword" placeholder="••••••••" required 
+                        class="w-full pl-10 pr-4 py-3 bg-slate-900 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-blue-500">
+                </div>
+            </div>
+
+            <button type="submit" class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg transition duration-200">
+                একাউন্ট তৈরি করুন
+            </button>
+        </form>
+
+    </div>
+
+    <!-- ট্যাব সুইচের সাধারণ জাভাস্ক্রিপ্ট -->
+    <script>
+        function switchTab(tab) {
+            const loginForm = document.getElementById('loginForm');
+            const registerForm = document.getElementById('registerForm');
+            const loginBtn = document.getElementById('loginTabBtn');
+            const registerBtn = document.getElementById('registerTabBtn');
+
+            if (tab === 'login') {
+                loginForm.classList.remove('hidden');
+                registerForm.classList.add('hidden');
+                
+                loginBtn.className = "w-1/2 py-2.5 text-sm font-semibold rounded-lg bg-white text-slate-900 transition-all";
+                registerBtn.className = "w-1/2 py-2.5 text-sm font-semibold text-slate-400 hover:text-white transition-all";
+            } else {
+                loginForm.classList.add('hidden');
+                registerForm.classList.remove('hidden');
+
+                registerBtn.className = "w-1/2 py-2.5 text-sm font-semibold rounded-lg bg-white text-slate-900 transition-all";
+                loginBtn.className = "w-1/2 py-2.5 text-sm font-semibold text-slate-400 hover:text-white transition-all";
+            }
+        }
+    </script>
+
+    <script src="script.js"></script>
+</body>
+</html>

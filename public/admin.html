@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Verification Panel</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen p-8 font-sans">
+
+    <div class="max-w-6xl mx-auto">
+        <div class="flex justify-between items-center mb-8 border-b border-slate-800 pb-4">
+            <div>
+                <h1 class="text-2xl font-bold text-blue-400"><i class="fas fa-user-shield me-2"></i>AI Security Verification Control</h1>
+                <p class="text-slate-400 text-sm">অ্যাডমিন ফরেনসিক অ্যান্ড ফেস রেজিস্ট্রি ডাটাবেজ</p>
+            </div>
+            <a href="/dashboard.html" class="bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded-lg text-sm text-slate-300 transition">
+                <i class="fas fa-arrow-left mr-2"></i>User Dashboard
+            </a>
+        </div>
+
+        <div id="requestsContainer" class="grid grid-cols-1 gap-6">
+            <p class="text-slate-500">ডাটাবেজ কানেক্ট হচ্ছে...</p>
+        </div>
+    </div>
+
+    <script>
+        function formatDocType(type) {
+            if (!type) return 'NID Card';
+            switch (type) {
+                case 'nid': return 'জাতীয় পরিচয়পত্র (NID)';
+                case 'passport': return 'পাসপোর্ট (Passport)';
+                case 'driving_license': return 'ড্রাইভিং লাইসেন্স (Driving License)';
+                case 'birth_certificate': return 'জন্ম নিবন্ধন (Birth Certificate)';
+                default: return type.toUpperCase();
+            }
+        }
+
+        async function loadAdminRequests() {
+            try {
+                const res = await fetch('/api/auth/admin/verifications');
+                const data = await res.json();
+                const container = document.getElementById('requestsContainer');
+
+                if (!data || data.length === 0) {
+                    container.innerHTML = `<div class="p-6 bg-slate-900 rounded-xl text-center text-slate-400">কোনো ভেরিফিকেশন আবেদন পাওয়া যায়নি।</div>`;
+                    return;
+                }
+
+                container.innerHTML = data.map(item => `
+                    <div class="bg-slate-900 border border-slate-800 rounded-xl p-6 shadow-xl">
+                        <div class="flex flex-wrap justify-between items-start gap-4 mb-4 border-b border-slate-800 pb-3">
+                            <div>
+                                <div class="flex items-center gap-3">
+                                    <h3 class="text-lg font-bold text-blue-300">
+                                        <i class="fas fa-id-card mr-2"></i>${formatDocType(item.documentType)}
+                                    </h3>
+                                    <span class="bg-blue-500/10 text-blue-400 text-xs px-2 py-0.5 rounded border border-blue-500/20 font-mono">
+                                        ID No: ${item.documentNumber || 'N/A'}
+                                    </span>
+                                </div>
+                                <span class="text-xs font-mono text-slate-500 mt-1 block">REG ID: ${item._id}</span>
+                            </div>
+
+                            <div class="flex items-center gap-3">
+                                <!-- AI Match Score Badge -->
+                                <div class="bg-emerald-950 border border-emerald-500/30 text-emerald-400 text-xs px-3 py-1 rounded-full font-bold flex items-center gap-1">
+                                    <i class="fas fa-robot text-emerald-400"></i> AI Match: ${item.matchScore || 90}%
+                                </div>
+
+                                <span class="px-3 py-1 rounded-full text-xs font-semibold ${
+                                    item.status === 'APPROVED' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' :
+                                    item.status === 'REJECTED' ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20' :
+                                    'bg-amber-500/10 text-amber-400 border border-amber-500/20'
+                                }">
+                                    ${item.status}
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- 3 Image Columns -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                            <div class="bg-slate-950 p-3 rounded-lg border border-slate-800">
+                                <p class="text-xs text-slate-400 mb-2 font-semibold"><i class="fas fa-camera text-blue-400 mr-1"></i> Live Selfie:</p>
+                                ${item.selfieUrl ? `
+                                    <a href="${item.selfieUrl}" target="_blank">
+                                        <img src="${item.selfieUrl}" class="w-full h-44 object-cover rounded border border-slate-800 hover:opacity-90 cursor-pointer">
+                                    </a>
+                                ` : '<p class="text-xs text-rose-400">ফাইল নেই</p>'}
+                            </div>
+
+                            <div class="bg-slate-950 p-3 rounded-lg border border-slate-800">
+                                <p class="text-xs text-slate-400 mb-2 font-semibold"><i class="fas fa-file-image text-blue-400 mr-1"></i> Front Side:</p>
+                                ${(item.docFrontUrl || item.nidUrl) ? `
+                                    <a href="${item.docFrontUrl || item.nidUrl}" target="_blank">
+                                        <img src="${item.docFrontUrl || item.nidUrl}" class="w-full h-44 object-cover rounded border border-slate-800 hover:opacity-90 cursor-pointer">
+                                    </a>
+                                ` : '<p class="text-xs text-rose-400">ফাইল নেই</p>'}
+                            </div>
+
+                            <div class="bg-slate-950 p-3 rounded-lg border border-slate-800">
+                                <p class="text-xs text-slate-400 mb-2 font-semibold"><i class="fas fa-file-image text-blue-400 mr-1"></i> Back Side:</p>
+                                ${item.docBackUrl ? `
+                                    <a href="${item.docBackUrl}" target="_blank">
+                                        <img src="${item.docBackUrl}" class="w-full h-44 object-cover rounded border border-slate-800 hover:opacity-90 cursor-pointer">
+                                    </a>
+                                ` : '<div class="h-44 flex items-center justify-center border border-slate-800 border-dashed rounded"><p class="text-xs text-slate-500">প্রযোজ্য নয়</p></div>'}
+                            </div>
+                        </div>
+
+                        <!-- Action Bar -->
+                        <div class="flex flex-col md:flex-row gap-3 items-center pt-2 border-t border-slate-800">
+                            <input type="text" id="note-${item._id}" value="${item.adminNote || ''}" placeholder="অ্যাডমিন ভেরিফিকেশন নোট লিখুন..." class="bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-200 flex-1 focus:outline-none focus:border-blue-500">
+                            <div class="flex gap-2">
+                                <button onclick="updateStatus('${item._id}', 'APPROVED')" class="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition">
+                                    <i class="fas fa-check mr-1"></i> Approve & Verify
+                                </button>
+                                <button onclick="updateStatus('${item._id}', 'REJECTED')" class="bg-rose-600 hover:bg-rose-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition">
+                                    <i class="fas fa-times mr-1"></i> Reject Request
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        async function updateStatus(id, newStatus) {
+            const noteInput = document.getElementById(`note-${id}`);
+            const adminNote = noteInput ? noteInput.value : '';
+
+            try {
+                const res = await fetch(`/api/auth/admin/verification/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status: newStatus, adminNote })
+                });
+
+                if (res.ok) {
+                    alert(`স্ট্যাটাস পরিবর্তন করে ${newStatus} করা হয়েছে!`);
+                    loadAdminRequests();
+                }
+            } catch (err) {
+                alert('আপডেট করতে সমস্যা হয়েছে!');
+            }
+        }
+
+        loadAdminRequests();
+    </script>
+</body>
+</html>
